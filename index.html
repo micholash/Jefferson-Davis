@@ -1,1 +1,621 @@
-ㅎㅇ
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Firebase 로그인 데이터 관리</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #e3f2fd, #fce4ec);
+      font-family: Arial, sans-serif;
+      color: #333;
+    }
+
+    .container {
+      width: min(900px, 92%);
+      margin: 40px auto;
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.16);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      text-align: center;
+      font-size: 28px;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 22px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #777;
+      margin-bottom: 28px;
+      font-size: 14px;
+    }
+
+    .auth-box {
+      max-width: 420px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    input {
+      height: 46px;
+      padding: 0 14px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #42a5f5;
+      box-shadow: 0 0 0 3px rgba(66, 165, 245, 0.15);
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 0 16px;
+      height: 46px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.15s;
+      font-weight: bold;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      opacity: 0.9;
+    }
+
+    .login-btn {
+      background: #42a5f5;
+      color: white;
+    }
+
+    .signup-btn {
+      background: #7e57c2;
+      color: white;
+    }
+
+    .logout-btn {
+      background: #455a64;
+      color: white;
+    }
+
+    .add-btn {
+      background: #42a5f5;
+      color: white;
+    }
+
+    .refresh-btn {
+      background: #66bb6a;
+      color: white;
+      margin-bottom: 16px;
+    }
+
+    .edit-btn {
+      background: #ffca28;
+      color: #333;
+    }
+
+    .delete-btn {
+      background: #ef5350;
+      color: white;
+    }
+
+    .save-btn {
+      background: #7e57c2;
+      color: white;
+    }
+
+    .cancel-btn {
+      background: #b0bec5;
+      color: white;
+    }
+
+    .form-box {
+      display: grid;
+      grid-template-columns: 1fr 2fr auto;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+      padding: 14px;
+      border-radius: 16px;
+      background: #f7f9fb;
+    }
+
+    .user-info {
+      font-size: 14px;
+      color: #555;
+      word-break: break-all;
+    }
+
+    .status {
+      min-height: 24px;
+      margin-bottom: 14px;
+      color: #555;
+      font-size: 14px;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 16px;
+      border-radius: 16px;
+      background: #f7f9fb;
+      border: 1px solid #edf1f5;
+    }
+
+    .item-title {
+      margin: 0 0 6px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .item-content {
+      margin: 0;
+      color: #555;
+      line-height: 1.5;
+      word-break: break-all;
+    }
+
+    .item-date {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #999;
+    }
+
+    .item-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .edit-box {
+      display: grid;
+      grid-template-columns: 1fr 2fr auto auto;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 30px;
+      color: #888;
+      background: #f7f9fb;
+      border-radius: 16px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .notice {
+      max-width: 620px;
+      margin: 20px auto 0;
+      padding: 14px;
+      border-radius: 14px;
+      background: #fff8e1;
+      color: #6d4c41;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 700px) {
+      .form-box,
+      .item,
+      .edit-box,
+      .top-bar {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .item-actions {
+        justify-content: flex-end;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Firebase 로그인 데이터 관리</h1>
+    <div class="subtitle">Firebase Authentication + Realtime Database 연동 예제</div>
+
+    <section id="authSection">
+      <div class="auth-box">
+        <h2>로그인 / 회원가입</h2>
+        <input id="emailInput" type="email" placeholder="이메일" />
+        <input id="passwordInput" type="password" placeholder="비밀번호 6자리 이상" />
+        <button class="login-btn" id="loginBtn">로그인</button>
+        <button class="signup-btn" id="signupBtn">회원가입</button>
+      </div>
+
+      <div class="notice">
+        처음 사용하는 이메일은 회원가입을 먼저 누르세요.<br />
+        이미 가입한 이메일은 로그인 버튼을 누르면 됩니다.
+      </div>
+    </section>
+
+    <section id="mainSection" class="hidden">
+      <div class="top-bar">
+        <div class="user-info">
+          로그인 계정: <strong id="userEmail"></strong>
+        </div>
+        <button class="logout-btn" id="logoutBtn">로그아웃</button>
+      </div>
+
+      <div class="form-box">
+        <input id="titleInput" type="text" placeholder="제목 입력" />
+        <input id="contentInput" type="text" placeholder="내용 입력" />
+        <button class="add-btn" id="addBtn">추가</button>
+      </div>
+
+      <button class="refresh-btn" id="refreshBtn">데이터 새로고침</button>
+      <div id="status" class="status"></div>
+      <div id="dataList" class="list"></div>
+    </section>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
+    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+    import {
+      getDatabase,
+      ref,
+      push,
+      set,
+      update,
+      remove,
+      onValue,
+      off
+    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
+    const firebaseConfig = {
+      apiKey: 'AIzaSyDO-v52Ehwphh5gW0WBzu9_DliMhOzy4Yo',
+      authDomain: 'kang-f4e85.firebaseapp.com',
+      databaseURL: 'https://kang-f4e85-default-rtdb.firebaseio.com',
+      projectId: 'kang-f4e85',
+      storageBucket: 'kang-f4e85.firebasestorage.app',
+      messagingSenderId: '107057126084',
+      appId: '1:107057126084:web:30f7bcb3f25dd2aa4a0791',
+      measurementId: 'G-DJ52YTYQZM'
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const database = getDatabase(app);
+
+    const authSection = document.getElementById('authSection');
+    const mainSection = document.getElementById('mainSection');
+
+    const emailInput = document.getElementById('emailInput');
+    const passwordInput = document.getElementById('passwordInput');
+    const loginBtn = document.getElementById('loginBtn');
+    const signupBtn = document.getElementById('signupBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    const userEmail = document.getElementById('userEmail');
+    const titleInput = document.getElementById('titleInput');
+    const contentInput = document.getElementById('contentInput');
+    const addBtn = document.getElementById('addBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const dataList = document.getElementById('dataList');
+    const statusBox = document.getElementById('status');
+
+    let currentUser = null;
+    let currentItemsRef = null;
+
+    function setStatus(message) {
+      statusBox.textContent = message;
+    }
+
+    function getEmailAndPassword() {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+
+      if (!email || !password) {
+        alert('이메일과 비밀번호를 모두 입력해주세요.');
+        return null;
+      }
+
+      if (password.length < 6) {
+        alert('비밀번호는 6자리 이상이어야 합니다.');
+        return null;
+      }
+
+      return { email, password };
+    }
+
+    signupBtn.addEventListener('click', async () => {
+      const account = getEmailAndPassword();
+      if (!account) return;
+
+      try {
+        await createUserWithEmailAndPassword(auth, account.email, account.password);
+        alert('회원가입이 완료되었습니다.');
+      } catch (error) {
+        alert(getKoreanErrorMessage(error.code));
+      }
+    });
+
+    loginBtn.addEventListener('click', async () => {
+      const account = getEmailAndPassword();
+      if (!account) return;
+
+      try {
+        await signInWithEmailAndPassword(auth, account.email, account.password);
+      } catch (error) {
+        alert(getKoreanErrorMessage(error.code));
+      }
+    });
+
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+      } catch (error) {
+        alert('로그아웃에 실패했습니다.');
+      }
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        showMainPage(user);
+        startRealtimeDataListener(user.uid);
+      } else {
+        currentUser = null;
+        showAuthPage();
+        stopRealtimeDataListener();
+      }
+    });
+
+    function showMainPage(user) {
+      authSection.classList.add('hidden');
+      mainSection.classList.remove('hidden');
+      userEmail.textContent = user.email;
+      emailInput.value = '';
+      passwordInput.value = '';
+    }
+
+    function showAuthPage() {
+      authSection.classList.remove('hidden');
+      mainSection.classList.add('hidden');
+      userEmail.textContent = '';
+      dataList.innerHTML = '';
+    }
+
+    function startRealtimeDataListener(uid) {
+      stopRealtimeDataListener();
+      setStatus('데이터를 불러오는 중입니다...');
+
+      currentItemsRef = ref(database, `users/${uid}/items`);
+
+      onValue(currentItemsRef, (snapshot) => {
+        const data = snapshot.val();
+        renderData(data);
+        setStatus('데이터가 실시간으로 동기화되었습니다.');
+      }, (error) => {
+        console.error(error);
+        setStatus('데이터를 불러오지 못했습니다. Firebase 보안 규칙을 확인하세요.');
+      });
+    }
+
+    function stopRealtimeDataListener() {
+      if (currentItemsRef) {
+        off(currentItemsRef);
+        currentItemsRef = null;
+      }
+    }
+
+    addBtn.addEventListener('click', addData);
+    refreshBtn.addEventListener('click', () => {
+      if (currentUser) {
+        startRealtimeDataListener(currentUser.uid);
+      }
+    });
+
+    async function addData() {
+      if (!currentUser) {
+        alert('로그인이 필요합니다.');
+        return;
+      }
+
+      const title = titleInput.value.trim();
+      const content = contentInput.value.trim();
+
+      if (!title || !content) {
+        alert('제목과 내용을 모두 입력해주세요.');
+        return;
+      }
+
+      try {
+        const itemsRef = ref(database, `users/${currentUser.uid}/items`);
+        const newItemRef = push(itemsRef);
+
+        await set(newItemRef, {
+          title,
+          content,
+          createdAt: new Date().toLocaleString('ko-KR'),
+          updatedAt: ''
+        });
+
+        titleInput.value = '';
+        contentInput.value = '';
+      } catch (error) {
+        console.error(error);
+        alert('데이터 추가에 실패했습니다.');
+      }
+    }
+
+    window.deleteData = async function(id) {
+      if (!currentUser) return;
+
+      const isConfirmed = confirm('정말 삭제하시겠습니까?');
+      if (!isConfirmed) return;
+
+      try {
+        await remove(ref(database, `users/${currentUser.uid}/items/${id}`));
+      } catch (error) {
+        console.error(error);
+        alert('데이터 삭제에 실패했습니다.');
+      }
+    };
+
+    window.updateData = async function(id) {
+      if (!currentUser) return;
+
+      const editTitle = document.getElementById(`edit-title-${id}`).value.trim();
+      const editContent = document.getElementById(`edit-content-${id}`).value.trim();
+
+      if (!editTitle || !editContent) {
+        alert('수정할 제목과 내용을 모두 입력해주세요.');
+        return;
+      }
+
+      try {
+        await update(ref(database, `users/${currentUser.uid}/items/${id}`), {
+          title: editTitle,
+          content: editContent,
+          updatedAt: new Date().toLocaleString('ko-KR')
+        });
+      } catch (error) {
+        console.error(error);
+        alert('데이터 수정에 실패했습니다.');
+      }
+    };
+
+    function renderData(data) {
+      dataList.innerHTML = '';
+
+      if (!data) {
+        dataList.innerHTML = '<div class="empty">아직 저장된 데이터가 없습니다.</div>';
+        return;
+      }
+
+      const entries = Object.entries(data).reverse();
+
+      entries.forEach(([id, item]) => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.id = `item-${id}`;
+
+        div.innerHTML = `
+          <div>
+            <p class="item-title">${escapeHTML(item.title || '')}</p>
+            <p class="item-content">${escapeHTML(item.content || '')}</p>
+            <div class="item-date">
+              생성: ${item.createdAt || '-'}
+              ${item.updatedAt ? ` / 수정: ${item.updatedAt}` : ''}
+            </div>
+          </div>
+          <div class="item-actions">
+            <button class="edit-btn" onclick="showEditForm('${id}', '${escapeForAttribute(item.title || '')}', '${escapeForAttribute(item.content || '')}')">수정</button>
+            <button class="delete-btn" onclick="deleteData('${id}')">삭제</button>
+          </div>
+        `;
+
+        dataList.appendChild(div);
+      });
+    }
+
+    window.showEditForm = function(id, title, content) {
+      const itemBox = document.getElementById(`item-${id}`);
+
+      itemBox.innerHTML = `
+        <div class="edit-box">
+          <input id="edit-title-${id}" type="text" value="${title}" />
+          <input id="edit-content-${id}" type="text" value="${content}" />
+          <button class="save-btn" onclick="updateData('${id}')">저장</button>
+          <button class="cancel-btn" onclick="startRealtimeDataListener(currentUser.uid)">취소</button>
+        </div>
+      `;
+    };
+
+    function escapeHTML(text) {
+      return String(text)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function escapeForAttribute(text) {
+      return escapeHTML(text).replaceAll('`', '&#096;');
+    }
+
+    function getKoreanErrorMessage(code) {
+      switch (code) {
+        case 'auth/email-already-in-use':
+          return '이미 가입된 이메일입니다.';
+        case 'auth/invalid-email':
+          return '이메일 형식이 올바르지 않습니다.';
+        case 'auth/weak-password':
+          return '비밀번호가 너무 약합니다. 6자리 이상으로 입력해주세요.';
+        case 'auth/user-not-found':
+          return '가입되지 않은 이메일입니다.';
+        case 'auth/wrong-password':
+          return '비밀번호가 올바르지 않습니다.';
+        case 'auth/invalid-credential':
+          return '이메일 또는 비밀번호가 올바르지 않습니다.';
+        case 'auth/network-request-failed':
+          return '네트워크 연결을 확인해주세요.';
+        default:
+          return `오류가 발생했습니다: ${code}`;
+      }
+    }
+
+    document.addEventListener('keydown', function(event) {
+      if (event.key !== 'Enter') return;
+
+      const activeId = document.activeElement.id;
+
+      if (activeId === 'emailInput' || activeId === 'passwordInput') {
+        loginBtn.click();
+      }
+
+      if (activeId === 'titleInput' || activeId === 'contentInput') {
+        addBtn.click();
+      }
+    });
+  </script>
+</body>
+</html>
+
+
