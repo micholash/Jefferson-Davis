@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Firebase 로그인 데이터 관리</title>
+  <title>ChatGPT 질문 답변 페이지</title>
   <style>
     * {
       box-sizing: border-box;
@@ -32,44 +32,58 @@
       font-size: 28px;
     }
 
-    h2 {
-      margin-top: 0;
-      font-size: 22px;
-    }
-
     .subtitle {
       text-align: center;
       color: #777;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
       font-size: 14px;
     }
 
-    .auth-box {
-      max-width: 420px;
-      margin: 0 auto;
+    .info {
+      padding: 14px;
+      margin-bottom: 20px;
+      border-radius: 14px;
+      background: #e8f5e9;
+      color: #2e7d32;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .chat-box {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
 
-    input {
-      height: 46px;
-      padding: 0 14px;
+    textarea {
+      width: 100%;
+      min-height: 140px;
+      resize: vertical;
+      padding: 16px;
       border: 1px solid #ddd;
-      border-radius: 12px;
-      font-size: 15px;
+      border-radius: 16px;
+      font-size: 16px;
+      line-height: 1.5;
       outline: none;
+      font-family: Arial, sans-serif;
     }
 
-    input:focus {
+    textarea:focus {
       border-color: #42a5f5;
       box-shadow: 0 0 0 3px rgba(66, 165, 245, 0.15);
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
     }
 
     button {
       border: none;
       border-radius: 12px;
-      padding: 0 16px;
+      padding: 0 18px;
       height: 46px;
       font-size: 15px;
       cursor: pointer;
@@ -82,538 +96,162 @@
       opacity: 0.9;
     }
 
-    .login-btn {
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+      transform: none;
+    }
+
+    .ask-btn {
       background: #42a5f5;
       color: white;
     }
 
-    .signup-btn {
-      background: #7e57c2;
-      color: white;
-    }
-
-    .logout-btn {
-      background: #455a64;
-      color: white;
-    }
-
-    .add-btn {
-      background: #42a5f5;
-      color: white;
-    }
-
-    .refresh-btn {
-      background: #66bb6a;
-      color: white;
-      margin-bottom: 16px;
-    }
-
-    .edit-btn {
-      background: #ffca28;
-      color: #333;
-    }
-
-    .delete-btn {
-      background: #ef5350;
-      color: white;
-    }
-
-    .save-btn {
-      background: #7e57c2;
-      color: white;
-    }
-
-    .cancel-btn {
+    .clear-btn {
       background: #b0bec5;
       color: white;
     }
 
-    .form-box {
-      display: grid;
-      grid-template-columns: 1fr 2fr auto;
-      gap: 10px;
-      margin-bottom: 22px;
-    }
-
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 22px;
-      padding: 14px;
-      border-radius: 16px;
+    .answer-box {
+      min-height: 220px;
+      padding: 18px;
+      border-radius: 18px;
       background: #f7f9fb;
-    }
-
-    .user-info {
-      font-size: 14px;
-      color: #555;
-      word-break: break-all;
+      border: 1px solid #edf1f5;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
 
     .status {
       min-height: 24px;
-      margin-bottom: 14px;
       color: #555;
       font-size: 14px;
     }
 
-    .list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .item {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      align-items: center;
-      padding: 16px;
-      border-radius: 16px;
-      background: #f7f9fb;
-      border: 1px solid #edf1f5;
-    }
-
-    .item-title {
-      margin: 0 0 6px;
-      font-size: 18px;
+    .label {
       font-weight: bold;
+      margin-bottom: 6px;
     }
 
-    .item-content {
-      margin: 0;
-      color: #555;
-      line-height: 1.5;
-      word-break: break-all;
-    }
-
-    .item-date {
-      margin-top: 8px;
-      font-size: 12px;
-      color: #999;
-    }
-
-    .item-actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .edit-box {
-      display: grid;
-      grid-template-columns: 1fr 2fr auto auto;
-      gap: 8px;
-      width: 100%;
-    }
-
-    .empty {
-      text-align: center;
-      padding: 30px;
-      color: #888;
-      background: #f7f9fb;
-      border-radius: 16px;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .notice {
-      max-width: 620px;
-      margin: 20px auto 0;
-      padding: 14px;
-      border-radius: 14px;
-      background: #fff8e1;
-      color: #6d4c41;
-      font-size: 14px;
+    .help {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #777;
       line-height: 1.6;
     }
 
     @media (max-width: 700px) {
-      .form-box,
-      .item,
-      .edit-box,
-      .top-bar {
-        grid-template-columns: 1fr;
-        flex-direction: column;
-        align-items: stretch;
+      .button-row {
+        justify-content: stretch;
       }
 
-      .item-actions {
-        justify-content: flex-end;
+      button {
+        width: 100%;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Firebase 로그인 데이터 관리</h1>
-    <div class="subtitle">Firebase Authentication + Realtime Database 연동 예제</div>
+    <h1>ChatGPT 질문 답변</h1>
+    <div class="subtitle">GitHub Pages + Google Apps Script + OpenAI API 연동</div>
 
-    <section id="authSection">
-      <div class="auth-box">
-        <h2>로그인 / 회원가입</h2>
-        <input id="emailInput" type="email" placeholder="이메일" />
-        <input id="passwordInput" type="password" placeholder="비밀번호 6자리 이상" />
-        <button class="login-btn" id="loginBtn">로그인</button>
-        <button class="signup-btn" id="signupBtn">회원가입</button>
+    <div class="info">
+      현재 구조: GitHub Pages 화면 → Google Apps Script 서버 → OpenAI API → 답변 반환<br />
+      API Key는 index.html에 들어가지 않고 Apps Script의 스크립트 속성에 저장됩니다.
+    </div>
+
+    <div class="chat-box">
+      <div>
+        <div class="label">질문</div>
+        <textarea id="questionInput" placeholder="질문을 입력하세요. 예: 고등학생에게 파이썬 반복문을 쉽게 설명해줘."></textarea>
       </div>
 
-      <div class="notice">
-        처음 사용하는 이메일은 회원가입을 먼저 누르세요.<br />
-        이미 가입한 이메일은 로그인 버튼을 누르면 됩니다.
-      </div>
-    </section>
-
-    <section id="mainSection" class="hidden">
-      <div class="top-bar">
-        <div class="user-info">
-          로그인 계정: <strong id="userEmail"></strong>
-        </div>
-        <button class="logout-btn" id="logoutBtn">로그아웃</button>
+      <div class="button-row">
+        <button class="clear-btn" id="clearBtn">초기화</button>
+        <button class="ask-btn" id="askBtn">질문하기</button>
       </div>
 
-      <div class="form-box">
-        <input id="titleInput" type="text" placeholder="제목 입력" />
-        <input id="contentInput" type="text" placeholder="내용 입력" />
-        <button class="add-btn" id="addBtn">추가</button>
-      </div>
-
-      <button class="refresh-btn" id="refreshBtn">데이터 새로고침</button>
       <div id="status" class="status"></div>
-      <div id="dataList" class="list"></div>
-    </section>
+
+      <div>
+        <div class="label">답변</div>
+        <div id="answerBox" class="answer-box">아직 답변이 없습니다.</div>
+      </div>
+
+      <div class="help">
+        단축키: 질문 입력창에서 Ctrl + Enter를 누르면 질문이 전송됩니다.<br />
+        오류가 발생하면 Apps Script 배포 권한이 “모든 사용자”인지 확인하세요.
+      </div>
+    </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-    import {
-      getAuth,
-      createUserWithEmailAndPassword,
-      signInWithEmailAndPassword,
-      signOut,
-      onAuthStateChanged
-    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-    import {
-      getDatabase,
-      ref,
-      push,
-      set,
-      update,
-      remove,
-      onValue,
-      off
-    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+  <script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxTmD_aKFktnu5BcmOj0x84D15A5qOEkAbpoyJ7DEGzJR7UayIGwKLDL7nFhU3hbB_wVw/exec';
 
-    const firebaseConfig = {
-    apiKey: "AIzaSyBJYjgM5bF-i0spqmYFzwSz0rXrSJsFXH4",
-    authDomain: "jefferson-davis-c40d1.firebaseapp.com",
-    databaseURL: "https://jefferson-davis-c40d1-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "jefferson-davis-c40d1",
-    storageBucket: "jefferson-davis-c40d1.firebasestorage.app",
-    messagingSenderId: "981476340214",
-    appId: "1:981476340214:web:2a641f7f79c27ad4b2d7d7",
-    measurementId: "G-YJ3GKC67YM"
-  };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const database = getDatabase(app);
-
-    const authSection = document.getElementById('authSection');
-    const mainSection = document.getElementById('mainSection');
-
-    const emailInput = document.getElementById('emailInput');
-    const passwordInput = document.getElementById('passwordInput');
-    const loginBtn = document.getElementById('loginBtn');
-    const signupBtn = document.getElementById('signupBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-
-    const userEmail = document.getElementById('userEmail');
-    const titleInput = document.getElementById('titleInput');
-    const contentInput = document.getElementById('contentInput');
-    const addBtn = document.getElementById('addBtn');
-    const refreshBtn = document.getElementById('refreshBtn');
-    const dataList = document.getElementById('dataList');
+    const questionInput = document.getElementById('questionInput');
+    const answerBox = document.getElementById('answerBox');
     const statusBox = document.getElementById('status');
+    const askBtn = document.getElementById('askBtn');
+    const clearBtn = document.getElementById('clearBtn');
 
-    let currentUser = null;
-    let currentItemsRef = null;
+    askBtn.addEventListener('click', askChatGPT);
+    clearBtn.addEventListener('click', clearPage);
 
-    function setStatus(message) {
-      statusBox.textContent = message;
-    }
-
-    function getEmailAndPassword() {
-      const email = emailInput.value.trim();
-      const password = passwordInput.value.trim();
-
-      if (!email || !password) {
-        alert('이메일과 비밀번호를 모두 입력해주세요.');
-        return null;
-      }
-
-      if (password.length < 6) {
-        alert('비밀번호는 6자리 이상이어야 합니다.');
-        return null;
-      }
-
-      return { email, password };
-    }
-
-    signupBtn.addEventListener('click', async () => {
-      const account = getEmailAndPassword();
-      if (!account) return;
-
-      try {
-        await createUserWithEmailAndPassword(auth, account.email, account.password);
-        alert('회원가입이 완료되었습니다.');
-      } catch (error) {
-        alert(getKoreanErrorMessage(error.code));
+    questionInput.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter' && event.ctrlKey) {
+        askChatGPT();
       }
     });
 
-    loginBtn.addEventListener('click', async () => {
-      const account = getEmailAndPassword();
-      if (!account) return;
+    async function askChatGPT() {
+      const question = questionInput.value.trim();
 
-      try {
-        await signInWithEmailAndPassword(auth, account.email, account.password);
-      } catch (error) {
-        alert(getKoreanErrorMessage(error.code));
-      }
-    });
-
-    logoutBtn.addEventListener('click', async () => {
-      try {
-        await signOut(auth);
-      } catch (error) {
-        alert('로그아웃에 실패했습니다.');
-      }
-    });
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUser = user;
-        showMainPage(user);
-        startRealtimeDataListener(user.uid);
-      } else {
-        currentUser = null;
-        showAuthPage();
-        stopRealtimeDataListener();
-      }
-    });
-
-    function showMainPage(user) {
-      authSection.classList.add('hidden');
-      mainSection.classList.remove('hidden');
-      userEmail.textContent = user.email;
-      emailInput.value = '';
-      passwordInput.value = '';
-    }
-
-    function showAuthPage() {
-      authSection.classList.remove('hidden');
-      mainSection.classList.add('hidden');
-      userEmail.textContent = '';
-      dataList.innerHTML = '';
-    }
-
-    function startRealtimeDataListener(uid) {
-      stopRealtimeDataListener();
-      setStatus('데이터를 불러오는 중입니다...');
-
-      currentItemsRef = ref(database, `users/${uid}/items`);
-
-      onValue(currentItemsRef, (snapshot) => {
-        const data = snapshot.val();
-        renderData(data);
-        setStatus('데이터가 실시간으로 동기화되었습니다.');
-      }, (error) => {
-        console.error(error);
-        setStatus('데이터를 불러오지 못했습니다. Firebase 보안 규칙을 확인하세요.');
-      });
-    }
-
-    function stopRealtimeDataListener() {
-      if (currentItemsRef) {
-        off(currentItemsRef);
-        currentItemsRef = null;
-      }
-    }
-
-    addBtn.addEventListener('click', addData);
-    refreshBtn.addEventListener('click', () => {
-      if (currentUser) {
-        startRealtimeDataListener(currentUser.uid);
-      }
-    });
-
-    async function addData() {
-      if (!currentUser) {
-        alert('로그인이 필요합니다.');
-        return;
-      }
-
-      const title = titleInput.value.trim();
-      const content = contentInput.value.trim();
-
-      if (!title || !content) {
-        alert('제목과 내용을 모두 입력해주세요.');
+      if (!question) {
+        alert('질문을 입력해주세요.');
         return;
       }
 
       try {
-        const itemsRef = ref(database, `users/${currentUser.uid}/items`);
-        const newItemRef = push(itemsRef);
+        setLoading(true);
+        answerBox.textContent = '답변을 생성하는 중입니다...';
+        statusBox.textContent = 'Apps Script 서버에 요청을 보내는 중입니다.';
 
-        await set(newItemRef, {
-          title,
-          content,
-          createdAt: new Date().toLocaleString('ko-KR'),
-          updatedAt: ''
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            question: question
+          })
         });
 
-        titleInput.value = '';
-        contentInput.value = '';
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        answerBox.textContent = data.answer || '답변을 가져오지 못했습니다.';
+        statusBox.textContent = '답변 생성 완료';
       } catch (error) {
         console.error(error);
-        alert('데이터 추가에 실패했습니다.');
+        answerBox.textContent = '오류가 발생했습니다.\n\n' + error.message;
+        statusBox.textContent = '요청 실패';
+      } finally {
+        setLoading(false);
       }
     }
 
-    window.deleteData = async function(id) {
-      if (!currentUser) return;
-
-      const isConfirmed = confirm('정말 삭제하시겠습니까?');
-      if (!isConfirmed) return;
-
-      try {
-        await remove(ref(database, `users/${currentUser.uid}/items/${id}`));
-      } catch (error) {
-        console.error(error);
-        alert('데이터 삭제에 실패했습니다.');
-      }
-    };
-
-    window.updateData = async function(id) {
-      if (!currentUser) return;
-
-      const editTitle = document.getElementById(`edit-title-${id}`).value.trim();
-      const editContent = document.getElementById(`edit-content-${id}`).value.trim();
-
-      if (!editTitle || !editContent) {
-        alert('수정할 제목과 내용을 모두 입력해주세요.');
-        return;
-      }
-
-      try {
-        await update(ref(database, `users/${currentUser.uid}/items/${id}`), {
-          title: editTitle,
-          content: editContent,
-          updatedAt: new Date().toLocaleString('ko-KR')
-        });
-      } catch (error) {
-        console.error(error);
-        alert('데이터 수정에 실패했습니다.');
-      }
-    };
-
-    function renderData(data) {
-      dataList.innerHTML = '';
-
-      if (!data) {
-        dataList.innerHTML = '<div class="empty">아직 저장된 데이터가 없습니다.</div>';
-        return;
-      }
-
-      const entries = Object.entries(data).reverse();
-
-      entries.forEach(([id, item]) => {
-        const div = document.createElement('div');
-        div.className = 'item';
-        div.id = `item-${id}`;
-
-        div.innerHTML = `
-          <div>
-            <p class="item-title">${escapeHTML(item.title || '')}</p>
-            <p class="item-content">${escapeHTML(item.content || '')}</p>
-            <div class="item-date">
-              생성: ${item.createdAt || '-'}
-              ${item.updatedAt ? ` / 수정: ${item.updatedAt}` : ''}
-            </div>
-          </div>
-          <div class="item-actions">
-            <button class="edit-btn" onclick="showEditForm('${id}', '${escapeForAttribute(item.title || '')}', '${escapeForAttribute(item.content || '')}')">수정</button>
-            <button class="delete-btn" onclick="deleteData('${id}')">삭제</button>
-          </div>
-        `;
-
-        dataList.appendChild(div);
-      });
+    function setLoading(isLoading) {
+      askBtn.disabled = isLoading;
+      askBtn.textContent = isLoading ? '생성 중...' : '질문하기';
     }
 
-    window.showEditForm = function(id, title, content) {
-      const itemBox = document.getElementById(`item-${id}`);
-
-      itemBox.innerHTML = `
-        <div class="edit-box">
-          <input id="edit-title-${id}" type="text" value="${title}" />
-          <input id="edit-content-${id}" type="text" value="${content}" />
-          <button class="save-btn" onclick="updateData('${id}')">저장</button>
-          <button class="cancel-btn" onclick="startRealtimeDataListener(currentUser.uid)">취소</button>
-        </div>
-      `;
-    };
-
-    function escapeHTML(text) {
-      return String(text)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
+    function clearPage() {
+      questionInput.value = '';
+      answerBox.textContent = '아직 답변이 없습니다.';
+      statusBox.textContent = '';
     }
-
-    function escapeForAttribute(text) {
-      return escapeHTML(text).replaceAll('`', '&#096;');
-    }
-
-    function getKoreanErrorMessage(code) {
-      switch (code) {
-        case 'auth/email-already-in-use':
-          return '이미 가입된 이메일입니다.';
-        case 'auth/invalid-email':
-          return '이메일 형식이 올바르지 않습니다.';
-        case 'auth/weak-password':
-          return '비밀번호가 너무 약합니다. 6자리 이상으로 입력해주세요.';
-        case 'auth/user-not-found':
-          return '가입되지 않은 이메일입니다.';
-        case 'auth/wrong-password':
-          return '비밀번호가 올바르지 않습니다.';
-        case 'auth/invalid-credential':
-          return '이메일 또는 비밀번호가 올바르지 않습니다.';
-        case 'auth/network-request-failed':
-          return '네트워크 연결을 확인해주세요.';
-        default:
-          return `오류가 발생했습니다: ${code}`;
-      }
-    }
-
-    document.addEventListener('keydown', function(event) {
-      if (event.key !== 'Enter') return;
-
-      const activeId = document.activeElement.id;
-
-      if (activeId === 'emailInput' || activeId === 'passwordInput') {
-        loginBtn.click();
-      }
-
-      if (activeId === 'titleInput' || activeId === 'contentInput') {
-        addBtn.click();
-      }
-    });
   </script>
 </body>
 </html>
