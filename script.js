@@ -16,7 +16,7 @@ const firebaseConfig = {
 
 
 // ⚠️ 본인의 구글 앱스 스크립트 배포 Web App URL로 변경하세요!
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycb.../exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw-EycFyGtsvX8zMsh59wyCWr5kCOUMt-025fWADDa2OsE5lvyDjreVH99sAao4Me_EMg/exec';
 
 // Firebase 초기화
 const app = initializeApp(firebaseConfig);
