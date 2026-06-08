@@ -4,14 +4,16 @@ import { getDatabase, ref, set, onValue, update, remove } from "https://www.gsta
 
 // ⚠️ 본인의 Firebase 설정값으로 변경하세요!
 const firebaseConfig = {
-  apiKey: "AIzaSy...",
-  authDomain: "kang-f4e85.firebaseapp.com",
-  databaseURL: "https://kang-f4e85-default-rtdb.firebaseio.com",
-  projectId: "kang-f4e85",
-  storageBucket: "kang-f4e85.appspot.com",
-  messagingSenderId: "...",
-  appId: "..."
+  apiKey: "AIzaSyBJYjgM5bF-i0spqmYFzwSz0rXrSJsFXH4",
+  authDomain: "jefferson-davis-c40d1.firebaseapp.com",
+  databaseURL: "https://jefferson-davis-c40d1-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "jefferson-davis-c40d1",
+  storageBucket: "jefferson-davis-c40d1.firebasestorage.app",
+  messagingSenderId: "981476340214",
+  appId: "1:981476340214:web:2a641f7f79c27ad4b2d7d7",
+  measurementId: "G-YJ3GKC67YM"
 };
+
 
 // ⚠️ 본인의 구글 앱스 스크립트 배포 Web App URL로 변경하세요!
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycb.../exec';
