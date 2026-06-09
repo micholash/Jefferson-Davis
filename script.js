@@ -31,9 +31,12 @@ const audioPlayer = document.getElementById('audioPlayer');
 
 const imageBox = document.getElementById('imageBox');
 const monsterImage = document.getElementById('monsterImage');
-// 🎲 주사위 관련 DOM 캐싱
-const diceBox = document.getElementById('diceBox');
+
+// 🎲 3D 주사위 DOM 캐싱
+const diceWrapper = document.getElementById('diceWrapper');
+const dice3D = document.getElementById('dice3D');
 const diceValue = document.getElementById('diceValue');
+const diceFaceFront = document.querySelector('.dice-3d .face.front');
 
 let currentUser = null;
 let charData = null;
@@ -75,7 +78,7 @@ onAuthStateChanged(auth, (user) => {
         createCharBox.classList.remove('hidden');
         mainGamePlay.classList.add('hidden');
         imageBox.classList.add('hidden');
-        diceBox.classList.add('hidden');
+        diceWrapper.classList.add('hidden');
       } else {
         charData = data;
         createCharBox.classList.add('hidden');
@@ -117,7 +120,7 @@ async function resetCharacter() {
   chatHistory = [];
   isTutorial = false;
   imageBox.classList.add('hidden');
-  diceBox.classList.add('hidden');
+  diceWrapper.classList.add('hidden');
   await remove(ref(database, `users/${currentUser.uid}/character`));
   storyBox.textContent = "영웅의 혼백이 흩어졌습니다. 새로운 캐릭터를 생성하여 모험을 기약하세요.";
   optionsBox.innerHTML = "";
@@ -139,15 +142,15 @@ function updateCharSheetUI() {
 }
 
 /* ==========================================
-   3. 🐛 고정 첫 번째 인카운터 (주사위 판정 추가)
+   3. 🐛 고정 첫 번째 인카운터 (3D 주사위 연출)
    ========================================== */
 function startBugEncounter() {
   isTutorial = true;
   optionsBox.innerHTML = "";
-  diceBox.classList.add('hidden'); // 주사위창 숨김
+  diceWrapper.classList.add('hidden'); 
   
   imageBox.classList.remove('hidden');
-  monsterImage.src = "bug.png"; // 나중에 폴더에 넣을 벌레 이미지 파일명
+  monsterImage.src = "bug.png"; 
   
   const tutorialStory = `어둡고 습한 던전의 초입에 들어서자마자, 바닥에서 부스럭거리는 기괴한 소리가 들려옵니다. 횃불을 비추자 몸집이 거대한 '동굴 벌레' 한 마리가 기어옵니다! 벌레는 위협적으로 더듬이를 까딱이고 있습니다. 자, 첫 번째 전투 주사위를 굴릴 시간입니다. (1이 나오면 즉사합니다!)`;
   storyBox.textContent = tutorialStory;
@@ -170,69 +173,76 @@ function startBugEncounter() {
   setStatus("첫 번째 인카운터 발생!");
 }
 
-// 벌레 주사위 굴리기 판정 루틴
+// 🎲 3D 주사위 모션 작동 루틴
 async function rollForBugEncounter(selectedOption) {
-  optionsBox.innerHTML = "";
+  optionsBox.innerHTML = ""; // 중복 클릭 차단
   
-  // 🎲 1~20 주사위 굴리기
-  const rollResult = Math.floor(Math.random() * 20) + 1;
-  
-  // 주사위 화면 노출
-  diceBox.classList.remove('hidden');
-  diceValue.textContent = rollResult;
-  
-  if (rollResult === 1) {
-    // 💀 1번이 뜨면 무조건 죽는 하드코어 즉사 시나리오
-    const deathStory = `당신은 "${selectedOption}" 행동을 취하려 했습니다.\n\n그러나 아차! 발이 미끄러지며 중심을 잃고 그대로 벌레의 독니 위로 넘어집니다! 주사위가 [1] (대실패)이 나오며 벌레의 치명적인 맹독이 온몸에 퍼집니다. 당신은 던전 초입에서 비명도 지르지 못하고 쓰러집니다. (체력 -100 감소, 사망)`;
-    storyBox.textContent = deathStory;
+  // 1. 주사위 연출 영역 활성화 및 모션 가동
+  diceWrapper.classList.remove('hidden');
+  diceFaceFront.textContent = "🎲"; // 구르는 중에는 징표 표시
+  diceValue.textContent = "...";
+  dice3D.classList.add('dice-rolling'); // 빙글빙글 도는 CSS 애니메이션 주입
+  setStatus("주사위를 힘차게 던졌습니다!");
+
+  // 2. 1.2초 동안 주사위가 구른 후에 결과를 산출하고 멈추는 효과 (타이밍 동기화)
+  setTimeout(async () => {
+    // 애니메이션 멈춤
+    dice3D.classList.remove('dice-rolling');
     
-    // 주사위 색상 빨간색으로 경고 효과
-    diceBox.style.color = "#ff4444";
-    imageBox.classList.add('hidden'); // 죽었으니 몬스터는 숨김
+    // 1~20 결과 랜덤 산출
+    const rollResult = Math.floor(Math.random() * 20) + 1;
     
-    // Firebase DB에 체력 0으로 업데이트 (Update)
-    await update(ref(database, `users/${currentUser.uid}/character`), { hp: 0 });
+    // 주사위 한가운데와 텍스트창에 결과 숫자 주입
+    diceFaceFront.textContent = rollResult;
+    diceValue.textContent = rollResult;
     
-    // 부활(리셋) 버튼 제공
-    const btn = document.createElement('button');
-    btn.className = "danger-btn";
-    btn.textContent = "다시 무덤에서 부활하기 (캐릭터 리셋)";
-    btn.style.width = "100%";
-    btn.addEventListener('click', resetCharacter);
-    optionsBox.appendChild(btn);
-    
-    playTTS(deathStory);
-    setStatus("치명적 대실패: 사망");
-    
-  } else {
-    // 🎉 2 이상이면 아주 쉽게 잡는 시나리오
-    const winStory = `당신은 "${selectedOption}" 행동을 취했습니다!\n\n주사위가 [${rollResult}] (성공)이 나왔습니다! 벌레는 당신의 일격에 힘없이 찌그러지며 녹색 즙을 뿜고 쓰러집니다. 너무나도 손쉬운 승리입니다! 벌레의 잔해 속에서 동전 몇 개를 발견했습니다. (경험치 +20, 골드 +10 획득)`;
-    storyBox.textContent = winStory;
-    
-    // 주사위 색상 초록색/금색 계열 복구
-    diceBox.style.color = "#d4af37";
-    imageBox.classList.add('hidden'); // 처치 완료
-    
-    // Firebase DB 보상 업데이트 (Update)
-    let newGold = charData.gold + 10;
-    let newExp = charData.exp + 20;
-    await update(ref(database, `users/${currentUser.uid}/character`), { gold: newGold, exp: newExp });
-    
-    // AI 본 게임으로 넘어가는 버튼 제공
-    const nextBtn = document.createElement('button');
-    nextBtn.className = "primary-btn";
-    nextBtn.textContent = "던전 더 깊은 곳으로 이동하기 ➡️";
-    nextBtn.style.width = "100%";
-    nextBtn.addEventListener('click', () => {
-      diceBox.classList.add('hidden'); // 주사위창 다시 가림
-      chatHistory.push({ role: "assistant", content: `첫 번째 방에서 동굴 벌레를 주사위 ${rollResult}로 가볍게 처치하고 통과했다.` });
-      sendActionToMaster("벌레를 잡고 통로를 따라 다음 방으로 조심스럽게 걸어간다.");
-    });
-    optionsBox.appendChild(nextBtn);
-    
-    playTTS(winStory);
-    setStatus("전투 승리!");
-  }
+    if (rollResult === 1) {
+      // 💀 대실패 사망 루틴
+      const deathStory = `당신은 "${selectedOption}" 행동을 취하려 했습니다.\n\n그러나 아차! 발이 미끄러지며 중심을 잃고 그대로 벌레의 독니 위로 넘어집니다! 주사위가 [1] (대실패)이 나오며 벌레의 치명적인 맹독이 온몸에 퍼집니다. 당신은 던전 초입에서 비명도 지르지 못하고 쓰러집니다. (체력 -100 감소, 사망)`;
+      storyBox.textContent = deathStory;
+      
+      diceWrapper.style.color = "#ff4444";
+      imageBox.classList.add('hidden'); 
+      
+      await update(ref(database, `users/${currentUser.uid}/character`), { hp: 0 });
+      
+      const btn = document.createElement('button');
+      btn.className = "danger-btn";
+      btn.textContent = "다시 무덤에서 부활하기 (캐릭터 리셋)";
+      btn.style.width = "100%";
+      btn.addEventListener('click', resetCharacter);
+      optionsBox.appendChild(btn);
+      
+      playTTS(deathStory);
+      setStatus("치명적 대실패: 사망");
+      
+    } else {
+      // 🎉 성공 루틴
+      const winStory = `당신은 "${selectedOption}" 행동을 취했습니다!\n\n주사위가 [${rollResult}] (성공)이 나왔습니다! 벌레는 당신의 일격에 힘없이 찌그러지며 녹색 즙을 뿜고 쓰러집니다. 너무나도 손쉬운 승리입니다! 벌레의 잔해 속에서 동전 몇 개를 발견했습니다. (경험치 +20, 골드 +10 획득)`;
+      storyBox.textContent = winStory;
+      
+      diceWrapper.style.color = "#d4af37";
+      imageBox.classList.add('hidden'); 
+      
+      let newGold = charData.gold + 10;
+      let newExp = charData.exp + 20;
+      await update(ref(database, `users/${currentUser.uid}/character`), { gold: newGold, exp: newExp });
+      
+      const nextBtn = document.createElement('button');
+      nextBtn.className = "primary-btn";
+      nextBtn.textContent = "던전 더 깊은 곳으로 이동하기 ➡️";
+      nextBtn.style.width = "100%";
+      nextBtn.addEventListener('click', () => {
+        diceWrapper.classList.add('hidden'); 
+        chatHistory.push({ role: "assistant", content: `첫 번째 방에서 동굴 벌레를 주사위 ${rollResult}로 가볍게 처치하고 통과했다.` });
+        sendActionToMaster("벌레를 잡고 통로를 따라 다음 방으로 조심스럽게 걸어간다.");
+      });
+      optionsBox.appendChild(nextBtn);
+      
+      playTTS(winStory);
+      setStatus("전투 승리!");
+    }
+  }, 1200); // 1.2초간 주사위 롤링 연출 시간 고정
 }
 
 /* ==========================================
