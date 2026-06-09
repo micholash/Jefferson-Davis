@@ -205,62 +205,80 @@ button:hover {
   object-fit: contain;
   display: block;
 }
-/* 🎲 3D 주사위 컨테이너 */
+/* 🎲 3D 주사위 무대 배치 */
 .dice-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: 15px 0;
-  perspective: 600px; /* 3D 원근감 계수 설정 */
+  margin: 25px 0;
+  perspective: 1000px; /* 원근감을 대폭 줘서 앞으로 튀어나오는 느낌 극대화 */
 }
 
-/* 주사위 몸체 */
+/* 초리얼 주사위 프레임 */
 .dice-3d {
-  width: 70px;
-  height: 70px;
+  width: 80px;
+  height: 80px;
   position: relative;
   transform-style: preserve-3d;
-  transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.3, 1); /* 구르는 속도 조절 */
+  /* 멈출 때 부드럽고 묵직하게 정지하는 큐빅 베지에 */
+  transition: transform 1.6s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
-/* 20면체의 주사위 면 느낌 스타일 (원형 방패 모양 셰이프) */
+/* 20면체 정밀 입체 구조 셰이프 (골드 테두리 보석 스타일) */
 .dice-3d .face {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle, #8c1d1d 30%, #4a0000 100%); /* 붉은 보석 느낌 */
-  border: 2px solid #d4af37;
-  border-radius: 50%; /* 둥근 다면체 느낌 연출 */
-  color: #fff;
-  font-size: 26px;
-  font-weight: bold;
+  background: radial-gradient(circle at 35% 35%, #b81d1d 10%, #520000 90%);
+  border: 3px solid #f1c40f;
+  clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); /* 🌟 20면체의 삼각형/오각형 단면 느낌 형상화 */
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 900;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.5);
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.9);
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.6);
   backface-visibility: hidden;
+  font-family: 'Georgia', serif;
 }
 
-/* 기본 정면 배치 */
-.dice-3d .face.front {
-  transform: rotateY(0deg) translateZ(0px);
-}
-
-/* 주사위가 굴러갈 때 적용할 애니메이션 클래스 */
+/* 주사위를 던졌을 때 사방으로 통통 튕기며 굴러가는 다이내믹 애니메이션 */
 .dice-rolling {
-  animation: rollAnimation 1.2s linear infinite;
+  animation: hyperRoll 1.4s ease-out forwards;
 }
 
-@keyframes rollAnimation {
-  0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
-  100% { transform: rotateX(360deg) rotateY(720deg) rotateZ(360deg); }
+@keyframes hyperRoll {
+  0% {
+    transform: scale(0.3) translateZ(-400px) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+    filter: blur(1px);
+  }
+  25% {
+    transform: scale(1.4) translateY(-50px) translateZ(100px) rotateX(360deg) rotateY(180deg) rotateZ(90deg);
+    filter: blur(0px); /* 화면 앞으로 크게 튀어 오름 */
+  }
+  50% {
+    transform: scale(0.9) translateY(30px) translateZ(-50px) rotateX(720deg) rotateY(540deg) rotateZ(270deg);
+  }
+  70% {
+    transform: scale(1.1) translateY(-15px) translateZ(20px) rotateX(1080deg) rotateY(900deg) rotateZ(450deg);
+  }
+  85% {
+    transform: scale(0.95) translateY(5px) rotateX(1340deg) rotateY(1180deg) rotateZ(580deg);
+  }
+  100% {
+    transform: scale(1) translateY(0) rotateX(1440deg) rotateY(1440deg) rotateZ(720deg); /* 묵직하게 탁 착지 */
+  }
 }
 
+/* 결과 텍스트 인치업 */
 .dice-result-text {
-  font-size: 20px;
-  color: #d4af37;
-  margin-top: 12px;
+  font-size: 22px;
+  color: #f1c40f;
+  margin-top: 15px;
   font-weight: bold;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(241, 196, 15, 0.4);
 }
