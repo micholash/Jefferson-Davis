@@ -174,55 +174,54 @@ function startBugEncounter() {
 }
 
 // 🎲 3D 주사위 모션 작동 루틴
+// 🎲 발더스 게이트 스타일 정20면체 목표 판정 루틴
 async function rollForBugEncounter(selectedOption) {
-  optionsBox.innerHTML = ""; // 중복 클릭 차단
+  optionsBox.innerHTML = ""; // 버튼 중복 클릭 원천 차단
   
-  // 1. 주사위 연출 영역 활성화 및 모션 가동
+  // 1. 목표 난이도(DC) 설정 (발더스 게이트 시스템 방식 - 예: DC 11)
+  const dcTarget = Math.floor(Math.random() * 8) + 10; // 10 ~ 17 사이의 난이도 무작위 생성
+  document.getElementById('dcTargetValue').textContent = dcTarget;
+  
+  const resultTextContainer = document.querySelector('.dice-result-text');
+  resultTextContainer.textContent = "🎲 판정 주사위를 던지는 중...";
+  resultTextContainer.className = "dice-result-text"; // 클래스 초기화
+  
   diceWrapper.classList.remove('hidden');
-  diceFaceFront.textContent = "🎲"; // 구르는 중에는 징표 표시
-  diceValue.textContent = "...";
-  dice3D.classList.add('dice-rolling'); // 빙글빙글 도는 CSS 애니메이션 주입
-  setStatus("주사위를 힘차게 던졌습니다!");
+  
+  // 3D 20면체 모션 클래스 트리거 리프레시
+  dice3D.classList.remove('bg3-rolling');
+  void dice3D.offsetWidth; 
+  dice3D.classList.add('bg3-rolling');
+  
+  setStatus(`목표 난이도 DC ${dcTarget} 돌파를 위해 주사위를 투척했습니다!`);
 
-  // 2. 1.2초 동안 주사위가 구른 후에 결과를 산출하고 멈추는 효과 (타이밍 동기화)
+  // 2. 주사위가 휘몰아쳐 구르는 동안, 전면(f1) 레이어의 숫자를 주사위 눈처럼 실시간으로 롤링
+  const mainFace = document.querySelector('.dice-3d .face.f1');
+  let rollingTicks = 0;
+  const slotInterval = setInterval(() => {
+    mainFace.textContent = Math.floor(Math.random() * 20) + 1;
+    rollingTicks++;
+  }, 60);
+
+  // 3. 1.5초 후 롤링 애니메이션이 안착되면 합격 여부 계측
   setTimeout(async () => {
-    // 애니메이션 멈춤
-    dice3D.classList.remove('dice-rolling');
+    clearInterval(slotInterval);
     
-    // 1~20 결과 랜덤 산출
+    // 🎲 최종 운명의 다이스 스코어 산출
     const rollResult = Math.floor(Math.random() * 20) + 1;
+    mainFace.textContent = rollResult; // 정면 삼각형 폴리곤에 최종값 박제
+
+    // 난이도(DC) 통과 여부 검증
+    const isPassed = rollResult >= dcTarget;
     
-    // 주사위 한가운데와 텍스트창에 결과 숫자 주입
-    diceFaceFront.textContent = rollResult;
-    diceValue.textContent = rollResult;
-    
-    if (rollResult === 1) {
-      // 💀 대실패 사망 루틴
-      const deathStory = `당신은 "${selectedOption}" 행동을 취하려 했습니다.\n\n그러나 아차! 발이 미끄러지며 중심을 잃고 그대로 벌레의 독니 위로 넘어집니다! 주사위가 [1] (대실패)이 나오며 벌레의 치명적인 맹독이 온몸에 퍼집니다. 당신은 던전 초입에서 비명도 지르지 못하고 쓰러집니다. (체력 -100 감소, 사망)`;
-      storyBox.textContent = deathStory;
+    if (isPassed) {
+      // 🎉 난이도 돌파 성공 (PASS)
+      resultTextContainer.textContent = `SUCCESS (값: ${rollResult} / DC: ${dcTarget})`;
+      resultTextContainer.classList.add('roll-pass');
       
-      diceWrapper.style.color = "#ff4444";
-      imageBox.classList.add('hidden'); 
-      
-      await update(ref(database, `users/${currentUser.uid}/character`), { hp: 0 });
-      
-      const btn = document.createElement('button');
-      btn.className = "danger-btn";
-      btn.textContent = "다시 무덤에서 부활하기 (캐릭터 리셋)";
-      btn.style.width = "100%";
-      btn.addEventListener('click', resetCharacter);
-      optionsBox.appendChild(btn);
-      
-      playTTS(deathStory);
-      setStatus("치명적 대실패: 사망");
-      
-    } else {
-      // 🎉 성공 루틴
-      const winStory = `당신은 "${selectedOption}" 행동을 취했습니다!\n\n주사위가 [${rollResult}] (성공)이 나왔습니다! 벌레는 당신의 일격에 힘없이 찌그러지며 녹색 즙을 뿜고 쓰러집니다. 너무나도 손쉬운 승리입니다! 벌레의 잔해 속에서 동전 몇 개를 발견했습니다. (경험치 +20, 골드 +10 획득)`;
+      const winStory = `당신은 "${selectedOption}" 행동을 선언했습니다.\n\n[주사위 판정: 성공]\n격렬하게 요동치던 정20면체 주사위가 난이도 장벽(DC ${dcTarget})을 격파하고 [ ${rollResult} ]를 기록하며 안착했습니다!\n\n벌레는 당신의 완벽한 기세와 정확한 카운터 스트라이크에 밀려 박살나며 녹색 체액을 분출합니다. (경험치 +20, 골드 +10 획득)`;
       storyBox.textContent = winStory;
-      
-      diceWrapper.style.color = "#d4af37";
-      imageBox.classList.add('hidden'); 
+      imageBox.classList.add('hidden');
       
       let newGold = charData.gold + 10;
       let newExp = charData.exp + 20;
@@ -230,19 +229,41 @@ async function rollForBugEncounter(selectedOption) {
       
       const nextBtn = document.createElement('button');
       nextBtn.className = "primary-btn";
-      nextBtn.textContent = "던전 더 깊은 곳으로 이동하기 ➡️";
+      nextBtn.textContent = "성공! 다음 구역 진입하기 ➡️";
       nextBtn.style.width = "100%";
       nextBtn.addEventListener('click', () => {
-        diceWrapper.classList.add('hidden'); 
-        chatHistory.push({ role: "assistant", content: `첫 번째 방에서 동굴 벌레를 주사위 ${rollResult}로 가볍게 처치하고 통과했다.` });
-        sendActionToMaster("벌레를 잡고 통로를 따라 다음 방으로 조심스럽게 걸어간다.");
+        diceWrapper.classList.add('hidden');
+        chatHistory.push({ role: "assistant", content: `DC ${dcTarget} 난이도 체크를 주사위 ${rollResult}로 돌파함.` });
+        sendActionToMaster("벌레를 격퇴하고 길게 뻗은 던전 통로 내부로 진입한다.");
       });
       optionsBox.appendChild(nextBtn);
       
       playTTS(winStory);
-      setStatus("전투 승리!");
+      setStatus("난이도 체크 통과!");
+      
+    } else {
+      // 💀 난이도 돌파 실패 (FAIL)
+      resultTextContainer.textContent = `FAILED (값: ${rollResult} / DC: ${dcTarget})`;
+      resultTextContainer.classList.add('roll-fail');
+      
+      const failStory = `당신은 "${selectedOption}" 행동을 전개하려 했습니다.\n\n[주사위 판정: 실패]\n정20면체 폴리곤 주사위가 테이블 바닥을 굴렀으나, 목표 난이도(DC ${dcTarget})에 미치지 못하는 [ ${rollResult} ]이 뜨며 멈췄습니다.\n\n타이밍을 놓친 당신의 무기는 헛공간을 갈랐고, 역습을 감행한 동굴 벌레의 맹독 바늘이 명치를 관통합니다. 치명상을 입은 당신은 바닥으로 고꾸라집니다. (체력 -100 감소, 사망)`;
+      storyBox.textContent = failStory;
+      imageBox.classList.add('hidden');
+      
+      await update(ref(database, `users/${currentUser.uid}/character`), { hp: 0 });
+      
+      const btn = document.createElement('button');
+      btn.className = "danger-btn";
+      btn.textContent = "부활지에서 다시 시작하기 (캐릭터 리셋)";
+      btn.style.width = "100%";
+      btn.addEventListener('click', resetCharacter);
+      optionsBox.appendChild(btn);
+      
+      playTTS(failStory);
+      setStatus("난이도 판정 실패: 사망");
     }
-  }, 1200); // 1.2초간 주사위 롤링 연출 시간 고정
+    
+  }, 1500); // 1.5초간의 발더스 게이트식 관성 회전 딜레이
 }
 
 /* ==========================================
