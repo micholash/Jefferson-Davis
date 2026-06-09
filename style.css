@@ -184,3 +184,24 @@ button:hover {
   color: #a4947c; 
   min-height: 20px; 
 }
+
+/* 이미지 박스 스타일 */
+.image-box {
+  width: 100%;
+  max-height: 250px;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid #5c4028;
+  background: #140e0a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.image-box img {
+  max-width: 100%;
+  max-height: 250px;
+  object-fit: contain;
+  display: block;
+}
