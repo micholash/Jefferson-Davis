@@ -212,118 +212,119 @@ button:hover {
   align-items: center;
   justify-content: center;
   margin: 30px 0;
-  padding: 20px;
-  background: radial-gradient(circle, rgba(40,30,25,0.85) 0%, rgba(15,10,10,0.95) 100%);
-  border: 2px solid #5c4a37;
+  padding: 25px;
+  background: radial-gradient(circle, #231c16 0%, #0d0a08 100%);
+  border: 2px solid #634e32;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(212,175,55,0.1);
-  perspective: 1200px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.9), inset 0 0 30px rgba(212,175,55,0.15);
 }
 
-/* 🎯 난이도(DC) 배지 스타일 */
+/* 🎯 난이도(DC) 배지 */
 .dc-badge {
-  font-size: 16px;
-  color: #e3c598;
-  background: rgba(0, 0, 0, 0.6);
-  padding: 6px 16px;
-  border: 1px solid #856a4d;
+  font-size: 15px;
+  color: #ebd1af;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 8px 20px;
+  border: 1px solid #8f724d;
   border-radius: 20px;
   margin-bottom: 25px;
   font-weight: bold;
   letter-spacing: 1px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 .dc-badge span {
   color: #ffaa00;
-  font-size: 20px;
-  text-shadow: 0 0 8px rgba(255, 170, 0, 0.5);
+  font-size: 22px;
+  font-weight: 900;
+  text-shadow: 0 0 10px rgba(255, 170, 0, 0.6);
 }
 
-/* 3D 공간 축 무대 */
+/* 주사위 배치 무대 */
 .dice-stage {
-  width: 100px;
-  height: 100px;
+  width: 140px;
+  height: 140px;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-/* 🌟 순수 CSS 정20면체 폴리곤 본체 */
-.dice-3d {
-  width: 80px;
-  height: 80px;
   position: relative;
-  transform-style: preserve-3d;
-  transform: rotateX(-20deg) rotateY(20deg);
-  transition: transform 1.8s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* 20면체의 개별 정밀 삼각형 페이스 성형 */
-.dice-3d .face {
-  position: absolute;
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, #2b0808 0%, #120202 100%);
-  border: 1px solid rgba(212, 175, 55, 0.4);
-  /* 삼각형 폴리곤 형태로 커팅 */
-  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-  color: #e3c598;
-  font-size: 18px;
-  font-weight: bold;
+/* 🌟 발더스 게이트 주사위 본체 오브젝트 */
+.bg3-dice {
+  width: 120px;
+  height: 120px;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-top: 20px; /* 삼각형 중심부에 맞게 조정 */
-  box-sizing: border-box;
-  backface-visibility: hidden;
-  font-family: 'Times New Roman', serif;
 }
 
-/* 📐 3D 기하학 좌표 공간 배치 (각 면을 정20면체 구도로 가공) */
-.dice-3d .f1  { transform: rotateY(0deg) rotateX(35deg) translateZ(42px); background: #4a0d0d; color: #fff; font-size: 24px; font-weight: 900; border: 2px solid #d4af37; text-shadow: 0 0 5px #000; } /* 🌟 크리티컬 정면 */
-.dice-3d .f2  { transform: rotateY(72deg) rotateX(35deg) translateZ(42px); }
-.dice-3d .f3  { transform: rotateY(144deg) rotateX(35deg) translateZ(42px); }
-.dice-3d .f4  { transform: rotateY(216deg) rotateX(35deg) translateZ(42px); }
-.dice-3d .f5  { transform: rotateY(288deg) rotateX(35deg) translateZ(42px); }
-.dice-3d .f6  { transform: rotateY(36deg) rotateX(-35deg) translateZ(42px); }
-.dice-3d .f7  { transform: rotateY(108deg) rotateX(-35deg) translateZ(42px); }
-.dice-3d .f8  { transform: rotateY(180deg) rotateX(-35deg) translateZ(42px); }
-.dice-3d .f9  { transform: rotateY(252deg) rotateX(-35deg) translateZ(42px); }
-.dice-3d .f10 { transform: rotateY(324deg) rotateX(-35deg) translateZ(42px); }
-.dice-3d .f11 { transform: rotateY(180deg) rotateX(180deg) translateZ(42px); }
-.dice-3d .f12 { transform: rotateY(252deg) rotateX(180deg) translateZ(42px); }
-.dice-3d .f13 { transform: rotateY(324deg) rotateX(180deg) translateZ(42px); }
-.dice-3d .f14 { transform: rotateY(36deg) rotateX(180deg) translateZ(42px); }
-.dice-3d .f15 { transform: rotateY(108deg) rotateX(180deg) translateZ(42px); }
-.dice-3d .f16 { transform: rotateY(216deg) rotateX(145deg) translateZ(42px); }
-.dice-3d .f17 { transform: rotateY(288deg) rotateX(145deg) translateZ(42px); }
-.dice-3d .f18 { transform: rotateY(0deg) rotateX(145deg) translateZ(42px); }
-.dice-3d .f19 { transform: rotateY(72deg) rotateX(145deg) translateZ(42px); }
-.dice-3d .f20 { transform: rotateY(144deg) rotateX(145deg) translateZ(42px); }
-
-/* 발더스 게이트 회전 진동 롤링 궤적 */
-.bg3-rolling {
-  animation: bg3DiceRoll 1.5s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
+/* 기하학 SVG 주사위 그래픽 스타일 */
+.icosahedron-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 5px 10px rgba(0,0,0,0.7));
 }
 
-@keyframes bg3DiceRoll {
-  0% { transform: scale(0.4) rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
-  30% { transform: scale(1.3) rotateX(720deg) rotateY(1080deg) rotateZ(360deg); }
-  60% { transform: scale(0.9) rotateX(1440deg) rotateY(2160deg) rotateZ(720deg); }
-  85% { transform: scale(1.05) rotateX(1760deg) rotateY(2800deg) rotateZ(900deg); }
-  100% { transform: scale(1) rotateX(1800deg) rotateY(2880deg) rotateZ(900deg); } /* 정면 f1 레이어를 향해 정지 */
+/* 주사위 조각 면 스타일 (어두운 주철 보석 느낌) */
+.d20-face {
+  fill: #2c221e;
+  stroke: #cca662;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  transition: all 0.3s ease;
+}
+/* 입체감을 위한 음영 차이 부여 */
+.sub-face {
+  fill: #1a1412;
+  stroke: #947745;
 }
 
-/* 결과 알림 인터페이스 */
+/* 🌟 정중앙에 박히는 판정 글자 (발더스 게이트 디자인) */
+.dice-digit {
+  position: absolute;
+  font-size: 38px;
+  font-weight: 900;
+  color: #ffffff;
+  font-family: 'Georgia', serif;
+  text-shadow: 0 0 8px #000, 0 0 15px rgba(212,175,55,0.6);
+  user-select: none;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* 🌀 발더스 게이트 특유의 힘차게 스핀하며 회전하는 애니메이션 */
+.bg3-rolling-effect {
+  animation: bg3Spin 1.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes bg3Spin {
+  0% { transform: scale(0.4) rotate(0deg); filter: blur(2px); }
+  30% { transform: scale(1.3) rotate(540deg); filter: blur(0px); }
+  60% { transform: scale(0.95) rotate(900deg); }
+  85% { transform: scale(1.05) rotate(1060deg); }
+  100% { transform: scale(1) rotate(1080deg); } /* 부드럽게 감속하며 딱 정지 */
+}
+
+/* 💥 주사위가 멈추면서 테이블을 때리는 듯한 묵직한 임팩트 셰이크 */
+.bg3-impact {
+  animation: impactShake 0.3s ease-out;
+}
+
+@keyframes impactShake {
+  0% { transform: scale(1.2) translateY(-10px); }
+  50% { transform: scale(0.9) translateY(5px); }
+  100% { transform: scale(1) translateY(0); }
+}
+
+/* 결과 배너 알림 */
 .dice-result-text {
-  font-size: 18px;
-  color: #dbbfa5;
+  font-size: 19px;
+  color: #ebd1af;
   margin-top: 20px;
   font-weight: bold;
   letter-spacing: 0.5px;
-  transition: all 0.3s ease;
 }
 
-/* 패스 / 실패 시의 컬러 펄스 이펙트 */
-.roll-pass { color: #52ec45 !important; text-shadow: 0 0 10px rgba(82,236,69,0.4); }
-.roll-fail { color: #ff4a4a !important; text-shadow: 0 0 10px rgba(255,74,74,0.4); }
+/* 성공/실패 시 이펙트 효과 컬러 */
+.roll-pass { color: #4eff44 !important; text-shadow: 0 0 12px rgba(78,255,68,0.5); }
+.roll-fail { color: #ff3b3b !important; text-shadow: 0 0 12px rgba(255,59,59,0.5); }
