@@ -328,3 +328,61 @@ button:hover {
 /* 성공/실패 시 이펙트 효과 컬러 */
 .roll-pass { color: #4eff44 !important; text-shadow: 0 0 12px rgba(78,255,68,0.5); }
 .roll-fail { color: #ff3b3b !important; text-shadow: 0 0 12px rgba(255,59,59,0.5); }
+
+
+/* 🌐 구글 로그인 버튼 스타일 */
+.auth-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: radial-gradient(circle, #231c16 0%, #0d0a08 100%);
+  border: 2px solid #634e32;
+  border-radius: 16px;
+  max-width: 400px;
+  margin: 50px auto;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.9);
+  text-align: center;
+}
+
+.auth-container h2 {
+  color: #ebd1af;
+  margin-bottom: 10px;
+}
+
+.auth-subtitle {
+  color: #947745;
+  font-size: 14px;
+  margin-bottom: 30px;
+}
+
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 280px;
+  height: 45px;
+  background-color: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  color: #3c4043;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'Roboto', sans-serif;
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.google-btn:hover {
+  background-color: #f8f9fa;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.google-btn img {
+  width: 18px;
+  height: 18px;
+  margin-right: 12px;
+}
