@@ -175,51 +175,58 @@ function startBugEncounter() {
 
 // 🎲 3D 주사위 모션 작동 루틴
 // 🎲 발더스 게이트 스타일 정20면체 목표 판정 루틴
+// 🎲 [발더스 게이트 3] 완벽 구현 - 주사위 판정 마법 회로
 async function rollForBugEncounter(selectedOption) {
-  optionsBox.innerHTML = ""; // 버튼 중복 클릭 원천 차단
+  optionsBox.innerHTML = ""; // 더블 클릭 방지 차단
   
-  // 1. 목표 난이도(DC) 설정 (발더스 게이트 시스템 방식 - 예: DC 11)
-  const dcTarget = Math.floor(Math.random() * 8) + 10; // 10 ~ 17 사이의 난이도 무작위 생성
+  // 1. 시스템이 난이도 장벽(DC)을 설정 (예: 10~17)
+  const dcTarget = Math.floor(Math.random() * 8) + 10;
   document.getElementById('dcTargetValue').textContent = dcTarget;
   
   const resultTextContainer = document.querySelector('.dice-result-text');
-  resultTextContainer.textContent = "🎲 판정 주사위를 던지는 중...";
-  resultTextContainer.className = "dice-result-text"; // 클래스 초기화
+  const diceNumberDigit = document.getElementById('diceNumberDigit');
+  
+  resultTextContainer.textContent = "🎲 운명의 주사위를 굴립니다...";
+  resultTextContainer.className = "dice-result-text"; // 스타일 리셋
   
   diceWrapper.classList.remove('hidden');
   
-  // 3D 20면체 모션 클래스 트리거 리프레시
-  dice3D.classList.remove('bg3-rolling');
-  void dice3D.offsetWidth; 
-  dice3D.classList.add('bg3-rolling');
+  // 회전 효과 리셋 후 발동
+  dice3D.classList.remove('bg3-rolling-effect', 'bg3-impact');
+  void dice3D.offsetWidth; // 리플로우 강제 트리거
+  dice3D.classList.add('bg3-rolling-effect');
   
-  setStatus(`목표 난이도 DC ${dcTarget} 돌파를 위해 주사위를 투척했습니다!`);
+  setStatus(`난이도 DC ${dcTarget} 돌파 체크 중...`);
 
-  // 2. 주사위가 휘몰아쳐 구르는 동안, 전면(f1) 레이어의 숫자를 주사위 눈처럼 실시간으로 롤링
-  const mainFace = document.querySelector('.dice-3d .face.f1');
-  let rollingTicks = 0;
-  const slotInterval = setInterval(() => {
-    mainFace.textContent = Math.floor(Math.random() * 20) + 1;
-    rollingTicks++;
+  // 2. 주사위 회전 연출 시간 동안 숫자를 잔상 롤링 처리
+  let rollCounter = 0;
+  const rollingInterval = setInterval(() => {
+    diceNumberDigit.textContent = Math.floor(Math.random() * 20) + 1;
+    rollCounter++;
   }, 60);
 
-  // 3. 1.5초 후 롤링 애니메이션이 안착되면 합격 여부 계측
+  // 3. 1.3초 후 회전이 끝나면 멈추면서 "쿵" 하는 임팩트 셰이크 연출
   setTimeout(async () => {
-    clearInterval(slotInterval);
+    clearInterval(rollingInterval); // 숫자 롤링 중단
     
-    // 🎲 최종 운명의 다이스 스코어 산출
+    // 최종 운명의 눈 결정
     const rollResult = Math.floor(Math.random() * 20) + 1;
-    mainFace.textContent = rollResult; // 정면 삼각형 폴리곤에 최종값 박제
-
-    // 난이도(DC) 통과 여부 검증
+    diceNumberDigit.textContent = rollResult;
+    
+    // 회전 클래스를 빼고, 쾅 튕기는 임팩트 클래스 주입
+    dice3D.classList.remove('bg3-rolling-effect');
+    void dice3D.offsetWidth;
+    dice3D.classList.add('bg3-impact');
+    
+    // 성공/실패 여부 연산
     const isPassed = rollResult >= dcTarget;
     
     if (isPassed) {
-      // 🎉 난이도 돌파 성공 (PASS)
-      resultTextContainer.textContent = `SUCCESS (값: ${rollResult} / DC: ${dcTarget})`;
+      // 🎉 성공 판정 (PASS)
+      resultTextContainer.textContent = `성공 (수치: ${rollResult} / DC: ${dcTarget})`;
       resultTextContainer.classList.add('roll-pass');
       
-      const winStory = `당신은 "${selectedOption}" 행동을 선언했습니다.\n\n[주사위 판정: 성공]\n격렬하게 요동치던 정20면체 주사위가 난이도 장벽(DC ${dcTarget})을 격파하고 [ ${rollResult} ]를 기록하며 안착했습니다!\n\n벌레는 당신의 완벽한 기세와 정확한 카운터 스트라이크에 밀려 박살나며 녹색 체액을 분출합니다. (경험치 +20, 골드 +10 획득)`;
+      const winStory = `당신은 "${selectedOption}" 행동을 취했습니다.\n\n[주사위 판정: 성공]\n정20면체 다이스가 묵직하게 구른 뒤, 난이도 장벽(DC ${dcTarget})을 뚫어버리는 [ ${rollResult} ]의 숫자를 띄우며 안착했습니다!\n\n벌레는 당신의 완벽한 일격에 제대로 대처하지 못하고 찌그러지며 녹색 즙을 뿜어냅니다. 초보 모험가답지 않은 아주 훌륭한 솜씨입니다! (경험치 +20, 골드 +10 획득)`;
       storyBox.textContent = winStory;
       imageBox.classList.add('hidden');
       
@@ -229,24 +236,24 @@ async function rollForBugEncounter(selectedOption) {
       
       const nextBtn = document.createElement('button');
       nextBtn.className = "primary-btn";
-      nextBtn.textContent = "성공! 다음 구역 진입하기 ➡️";
+      nextBtn.textContent = "성공! 다음 통로로 이동하기 ➡️";
       nextBtn.style.width = "100%";
       nextBtn.addEventListener('click', () => {
         diceWrapper.classList.add('hidden');
-        chatHistory.push({ role: "assistant", content: `DC ${dcTarget} 난이도 체크를 주사위 ${rollResult}로 돌파함.` });
-        sendActionToMaster("벌레를 격퇴하고 길게 뻗은 던전 통로 내부로 진입한다.");
+        chatHistory.push({ role: "assistant", content: `DC ${dcTarget} 난이도 전투를 주사위 ${rollResult}로 돌파 성공.` });
+        sendActionToMaster("벌레를 처치하고 어두운 동굴 안쪽으로 무기를 꽉 쥐고 걸어 들어간다.");
       });
       optionsBox.appendChild(nextBtn);
       
       playTTS(winStory);
-      setStatus("난이도 체크 통과!");
+      setStatus("주사위 판정 통과!");
       
     } else {
-      // 💀 난이도 돌파 실패 (FAIL)
-      resultTextContainer.textContent = `FAILED (값: ${rollResult} / DC: ${dcTarget})`;
+      // 💀 실패 판정 (FAIL)
+      resultTextContainer.textContent = `실패 (수치: ${rollResult} / DC: ${dcTarget})`;
       resultTextContainer.classList.add('roll-fail');
       
-      const failStory = `당신은 "${selectedOption}" 행동을 전개하려 했습니다.\n\n[주사위 판정: 실패]\n정20면체 폴리곤 주사위가 테이블 바닥을 굴렀으나, 목표 난이도(DC ${dcTarget})에 미치지 못하는 [ ${rollResult} ]이 뜨며 멈췄습니다.\n\n타이밍을 놓친 당신의 무기는 헛공간을 갈랐고, 역습을 감행한 동굴 벌레의 맹독 바늘이 명치를 관통합니다. 치명상을 입은 당신은 바닥으로 고꾸라집니다. (체력 -100 감소, 사망)`;
+      const failStory = `당신은 "${selectedOption}" 행동을 전개하려 했습니다.\n\n[주사위 판정: 실패]\n금빛 문양이 새겨진 주사위가 멈춰 선 순간, 야속하게도 요구 난이도(DC ${dcTarget})보다 한참 모자란 [ ${rollResult} ]이 선명하게 새겨집니다.\n\n헛점을 보인 당신의 어깨 너머로 동굴 벌레가 사납게 돌진하더니 기어코 날카로운 독침을 꽂아 넣습니다. 온몸에 독이 퍼지며 차가운 던전 바닥에 쓰러집니다. (체력 -100 감소, 사망)`;
       storyBox.textContent = failStory;
       imageBox.classList.add('hidden');
       
@@ -254,16 +261,16 @@ async function rollForBugEncounter(selectedOption) {
       
       const btn = document.createElement('button');
       btn.className = "danger-btn";
-      btn.textContent = "부활지에서 다시 시작하기 (캐릭터 리셋)";
+      btn.textContent = "다시 무덤에서 부활하기 (캐릭터 리셋)";
       btn.style.width = "100%";
       btn.addEventListener('click', resetCharacter);
       optionsBox.appendChild(btn);
       
       playTTS(failStory);
-      setStatus("난이도 판정 실패: 사망");
+      setStatus("주사위 판정 실패: 사망");
     }
     
-  }, 1500); // 1.5초간의 발더스 게이트식 관성 회전 딜레이
+  }, 1300); // 1.3초 동안 발더스 게이트식 관성 회전 스핀 연출
 }
 
 /* ==========================================
