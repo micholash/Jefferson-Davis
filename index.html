@@ -11,13 +11,15 @@
 <div class="container">
   <h1>🎲 AI DUNGEON MASTER 🎲</h1>
 
-  <section id="authSection" class="auth-box">
-    <h2>모험가 등록</h2>
-    <input id="emailInput" type="email" placeholder="이메일 주소" />
-    <input id="passwordInput" type="password" placeholder="비밀번호 (6자리 이상)" />
-    <button class="primary-btn" id="loginBtn">로그인</button>
-    <button class="secondary-btn" id="signupBtn">새로운 모험가 가입</button>
-  </section>
+<div id="authSection" class="auth-container">
+  <h2>🎲 AI TRPG - 던전 마스터</h2>
+  <p class="auth-subtitle">구글 계정으로 로그인하여 당신의 모험을 시작하세요.</p>
+  
+  <button id="googleLoginBtn" class="google-btn">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/provider/google.svg" alt="Google Logo" />
+    Google 계정으로 로그인
+  </button>
+</div>
 
   <section id="gameSection" class="hidden">
     <div class="top-info">
