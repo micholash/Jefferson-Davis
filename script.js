@@ -1,5 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { 
+  getAuth, 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  signOut, 
+  onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getDatabase, ref, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
@@ -19,6 +25,8 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwfUN9Em7KWD7RS
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app);
+// 🌐 구글 로그인 제공업체 객체 선언
+const googleProvider = new GoogleAuthProvider();
 
 const authSection = document.getElementById('authSection');
 const gameSection = document.getElementById('gameSection');
@@ -35,8 +43,7 @@ const monsterImage = document.getElementById('monsterImage');
 // 🎲 3D 주사위 DOM 캐싱
 const diceWrapper = document.getElementById('diceWrapper');
 const dice3D = document.getElementById('dice3D');
-const diceValue = document.getElementById('diceValue');
-const diceFaceFront = document.querySelector('.dice-3d .face.front');
+const diceNumberDigit = document.getElementById('diceNumberDigit');
 
 let currentUser = null;
 let charData = null;
@@ -44,23 +51,18 @@ let chatHistory = [];
 let isTutorial = false;
 
 /* ==========================================
-   1. AUTHENTICATION (로그인 / 회원가입)
+   1. GOOGLE AUTHENTICATION (구글 로그인 인증 제어)
    ========================================== */
-document.getElementById('signupBtn').addEventListener('click', async () => {
-  const email = document.getElementById('emailInput').value.trim();
-  const password = document.getElementById('passwordInput').value.trim();
-  if(!email || !password) return alert('이메일과 비밀번호를 입력해 주세요.');
+document.getElementById('googleLoginBtn').addEventListener('click', async () => {
   try {
-    await createUserWithEmailAndPassword(auth, email, password);
-    alert('새로운 모험가 등록 성공!');
-  } catch(e) { alert("가입 실패: " + e.message); }
-});
-
-document.getElementById('loginBtn').addEventListener('click', async () => {
-  const email = document.getElementById('emailInput').value.trim();
-  const password = document.getElementById('passwordInput').value.trim();
-  if(!email || !password) return alert('이메일과 비밀번호를 입력해 주세요.');
-  try { await signInWithEmailAndPassword(auth, email, password); } catch(e) { alert("로그인 실패: " + e.message); }
+    setStatus('구글 인증 서버 통신 중...');
+    // 구글 팝업창을 띄워 로그인 처리
+    await signInWithPopup(auth, googleProvider);
+  } catch(e) { 
+    console.error(e);
+    alert("구글 로그인에 실패했습니다: " + e.message); 
+    setStatus('대기 중');
+  }
 });
 
 document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
@@ -70,7 +72,7 @@ onAuthStateChanged(auth, (user) => {
     currentUser = user;
     authSection.classList.add('hidden');
     gameSection.classList.remove('hidden');
-    document.getElementById('userEmail').textContent = user.email;
+    document.getElementById('userEmail').textContent = user.displayName || user.email; // 이름이 있으면 이름 출력
     
     onValue(ref(database, `users/${user.uid}/character`), (snapshot) => {
       const data = snapshot.val();
@@ -142,7 +144,7 @@ function updateCharSheetUI() {
 }
 
 /* ==========================================
-   3. 🐛 고정 첫 번째 인카운터 (3D 주사위 연출)
+   3. 🐛 고정 첫 번째 인카운터 (발더스 게이트 DC 시스템)
    ========================================== */
 function startBugEncounter() {
   isTutorial = true;
@@ -152,7 +154,7 @@ function startBugEncounter() {
   imageBox.classList.remove('hidden');
   monsterImage.src = "bug.png"; 
   
-  const tutorialStory = `어둡고 습한 던전의 초입에 들어서자마자, 바닥에서 부스럭거리는 기괴한 소리가 들려옵니다. 횃불을 비추자 몸집이 거대한 '동굴 벌레' 한 마리가 기어옵니다! 벌레는 위협적으로 더듬이를 까딱이고 있습니다. 자, 첫 번째 전투 주사위를 굴릴 시간입니다. (1이 나오면 즉사합니다!)`;
+  const tutorialStory = `어둡고 습한 던전의 초입에 들어서자마자, 바닥에서 부스럭거리는 기괴한 소리가 들려옵니다. 횃불을 비추자 몸집이 거대한 '동굴 벌레' 한 마리가 기어옵니다! 벌레는 위협적으로 더듬이를 까딱이고 있습니다. 자, 첫 번째 전투 주사위를 굴릴 시간입니다.`;
   storyBox.textContent = tutorialStory;
   
   const options = [
@@ -173,56 +175,44 @@ function startBugEncounter() {
   setStatus("첫 번째 인카운터 발생!");
 }
 
-// 🎲 3D 주사위 모션 작동 루틴
-// 🎲 발더스 게이트 스타일 정20면체 목표 판정 루틴
-// 🎲 [발더스 게이트 3] 완벽 구현 - 주사위 판정 마법 회로
 async function rollForBugEncounter(selectedOption) {
-  optionsBox.innerHTML = ""; // 더블 클릭 방지 차단
+  optionsBox.innerHTML = ""; 
   
-  // 1. 시스템이 난이도 장벽(DC)을 설정 (예: 10~17)
   const dcTarget = Math.floor(Math.random() * 8) + 10;
   document.getElementById('dcTargetValue').textContent = dcTarget;
   
   const resultTextContainer = document.querySelector('.dice-result-text');
-  const diceNumberDigit = document.getElementById('diceNumberDigit');
   
   resultTextContainer.textContent = "🎲 운명의 주사위를 굴립니다...";
-  resultTextContainer.className = "dice-result-text"; // 스타일 리셋
+  resultTextContainer.className = "dice-result-text"; 
   
   diceWrapper.classList.remove('hidden');
   
-  // 회전 효과 리셋 후 발동
   dice3D.classList.remove('bg3-rolling-effect', 'bg3-impact');
-  void dice3D.offsetWidth; // 리플로우 강제 트리거
+  void dice3D.offsetWidth; 
   dice3D.classList.add('bg3-rolling-effect');
   
   setStatus(`난이도 DC ${dcTarget} 돌파 체크 중...`);
 
-  // 2. 주사위 회전 연출 시간 동안 숫자를 잔상 롤링 처리
   let rollCounter = 0;
   const rollingInterval = setInterval(() => {
     diceNumberDigit.textContent = Math.floor(Math.random() * 20) + 1;
     rollCounter++;
   }, 60);
 
-  // 3. 1.3초 후 회전이 끝나면 멈추면서 "쿵" 하는 임팩트 셰이크 연출
   setTimeout(async () => {
-    clearInterval(rollingInterval); // 숫자 롤링 중단
+    clearInterval(rollingInterval); 
     
-    // 최종 운명의 눈 결정
     const rollResult = Math.floor(Math.random() * 20) + 1;
     diceNumberDigit.textContent = rollResult;
     
-    // 회전 클래스를 빼고, 쾅 튕기는 임팩트 클래스 주입
     dice3D.classList.remove('bg3-rolling-effect');
     void dice3D.offsetWidth;
     dice3D.classList.add('bg3-impact');
     
-    // 성공/실패 여부 연산
     const isPassed = rollResult >= dcTarget;
     
     if (isPassed) {
-      // 🎉 성공 판정 (PASS)
       resultTextContainer.textContent = `성공 (수치: ${rollResult} / DC: ${dcTarget})`;
       resultTextContainer.classList.add('roll-pass');
       
@@ -249,7 +239,6 @@ async function rollForBugEncounter(selectedOption) {
       setStatus("주사위 판정 통과!");
       
     } else {
-      // 💀 실패 판정 (FAIL)
       resultTextContainer.textContent = `실패 (수치: ${rollResult} / DC: ${dcTarget})`;
       resultTextContainer.classList.add('roll-fail');
       
@@ -270,7 +259,7 @@ async function rollForBugEncounter(selectedOption) {
       setStatus("주사위 판정 실패: 사망");
     }
     
-  }, 1300); // 1.3초 동안 발더스 게이트식 관성 회전 스핀 연출
+  }, 1300); 
 }
 
 /* ==========================================
@@ -339,12 +328,12 @@ async function sendActionToMaster(actionText) {
       optionsBox.appendChild(btn);
     }
     
-    setStatus("마스터의 목소리를 영적 주파수로 변환하는 중 (TTS)...");
+    setStatus("마스터의 목소리를 변환하는 중 (TTS)...");
     playTTS(gameResult.story);
     
   } catch (err) {
     console.error(err);
-    storyBox.textContent = "치명적인 마법 통신 장애 발생: " + err.message;
+    storyBox.textContent = "치명적인 통신 장애 발생: " + err.message;
     setStatus("연동 실패");
   }
 }
