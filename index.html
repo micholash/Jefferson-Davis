@@ -64,11 +64,22 @@
         <div class="dc-badge">목표 난이도 (DC): <span id="dcTargetValue">12</span></div>
       
         <div class="dice-stage">
-          <div id="dice3D" class="dice-3d">
-            <div class="face f1">1</div><div class="face f2">2</div><div class="face f3">3</div><div class="face f4">4</div><div class="face f5">5</div>
-            <div class="face f6">6</div><div class="face f7">7</div><div class="face f8">8</div><div class="face f9">9</div><div class="face f10">10</div>
-            <div class="face f11">11</div><div class="face f12">12</div><div class="face f13">13</div><div class="face f14">14</div><div class="face f15">15</div>
-            <div class="face f16">16</div><div class="face f17">17</div><div class="face f18">18</div><div class="face f19">19</div><div class="face f20">20</div>
+          <div id="dice3D" class="bg3-dice">
+            <svg viewBox="0 0 100 100" class="icosahedron-svg">
+              <polygon points="50,5 20,25 50,45" class="d20-face" />
+              <polygon points="50,5 50,45 80,25" class="d20-face" />
+              <polygon points="20,25 50,45 20,70" class="d20-face" />
+              <polygon points="80,25 50,45 80,70" class="d20-face" />
+              <polygon points="50,45 20,70 50,95" class="d20-face" />
+              <polygon points="50,45 50,95 80,70" class="d20-face" />
+              <polygon points="20,25 50,5 5,45" class="d20-face sub-face" />
+              <polygon points="20,25 20,70 5,45" class="d20-face sub-face" />
+              <polygon points="20,70 50,95 25,95" class="d20-face sub-face" />
+              <polygon points="80,25 50,5 95,45" class="d20-face sub-face" />
+              <polygon points="80,25 80,70 95,45" class="d20-face sub-face" />
+              <polygon points="80,70 50,95 75,95" class="d20-face sub-face" />
+            </svg>
+            <div id="diceNumberDigit" class="dice-digit">20</div>
           </div>
         </div>
       
